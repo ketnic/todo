@@ -7,9 +7,10 @@ const passport = require('passport');
 
 var apiRouter = require('./routes/api');
 
-
 const app = express();
 const PORT = 8000;
+
+models.sequelize.sync()
 
 app.use(cors({origin: `http://localhost:${PORT}`}));
 app.use(express.json());
