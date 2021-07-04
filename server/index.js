@@ -4,8 +4,9 @@ const env = require('dotenv');
 const models = require("./models");
 const session = require('express-session');
 const passport = require('passport');
+var cookieParser = require('cookie-parser');
 
-var apiRouter = require('./routes/api');
+var authRouter = require('./routes/auth');
 
 const app = express();
 const PORT = 8000;
@@ -16,12 +17,23 @@ app.use(cors({origin: `http://localhost:${PORT}`}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 
-app.use(session({ secret: 'keyboard cat',resave: true, saveUninitialized:true})); // session secret
+const sessionMiddleware = session({
+  secret: 'secret',
+  resave: true,
+  rolling: true,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 10 * 60 * 1000,
+    httpOnly: false,
+  },
+});
+
+app.use(cookieParser());
+app.use(sessionMiddleware);
 app.use(passport.initialize());
-app.use(passport.session()); // persistent login sessions
+app.use(passport.session());
 
-
-app.use('/api', apiRouter);
+app.use('/auth', authRouter);
 
 app.get('/', (req, res) => res.send(' 123 Express Server'));
 app.listen(PORT, () => {
